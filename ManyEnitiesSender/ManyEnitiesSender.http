@@ -1,0 +1,5 @@
+@ManyEnitiesSender_HostAddress = http://localhost:51882
+
+GET {{ManyEnitiesSender_HostAddress}}/api/Packages/GetCONNECT
+
+###

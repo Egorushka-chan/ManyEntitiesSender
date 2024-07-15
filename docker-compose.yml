@@ -1,0 +1,42 @@
+version: '3.4'
+
+services:
+  manyentitiessender:
+    container_name: WebApi
+    image: ${DOCKER_REGISTRY-}manyentitiessender
+    build:
+      context: .
+      dockerfile: ManyEnitiesSender/Dockerfile
+    networks:
+    - internal
+    env_file:
+    - ./.env
+  
+  redis:
+    container_name: RedisServer
+    image: redis:7.2.5
+    networks:
+    - internal
+    ports:
+    - 228:6379
+
+  postgres:
+    container_name: PostgreSQL
+    image: postgres:latest
+    networks:
+    - internal
+    ports:
+    - 3000:5432
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d wardrobe'"]
+      interval: "30s" 
+    environment:
+    - POSTGRES_USER=${POSTGRES_USER}
+    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+
+networks:
+  internal: {}
+
+
+
