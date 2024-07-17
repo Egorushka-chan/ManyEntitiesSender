@@ -7,5 +7,6 @@
     {
         public static object BodyLocker = new object();
         public static object HandLocker = new object();
+        public static object LegLocker = new object();
     }
 }

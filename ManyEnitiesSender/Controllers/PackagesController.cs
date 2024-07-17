@@ -16,8 +16,8 @@ namespace ManyEntitiesSender.Controllers
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         [ProducesResponseType(201)] // если прошло через middleware
         [Cacheable]
-        [HttpPut]
-        public IResult GetPackages([FromBody] PackageRequest packageRequest)
+        [HttpGet]
+        public IResult GetPackages([FromQuery] PackageRequest packageRequest)
         {
             ErrorResponse errorResponse = new()
             {

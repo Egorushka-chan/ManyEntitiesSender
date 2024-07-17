@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManyEntitiesSender.BLL.Models.Requests
+namespace ManyEntitiesSender.BLL.Models
 {
-    public class PackageRequest
+    public class RedisFilterOptions
     {
-        public string Table {  get; set; }
-        public string? Filter { get; set; }
+        public string? PropertyFilter { get; set; }
         public int? Skip { get; set; }
         public int? Take { get; set; }
     }
