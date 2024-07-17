@@ -9,15 +9,10 @@ namespace ManyEntitiesSender.BLL
 {
     public static class InjectorBLL
     {
-        public static void InjectBLL(this IServiceCollection services, string redisConfig, string redisInstance)
+        public static void InjectBLL(this IServiceCollection services)
         {
-            services.AddStackExchangeRedisCache(opt => {
-                opt.Configuration = redisConfig;
-                opt.InstanceName = redisInstance;
-            });
-
             services.AddScoped<ICacheableGetter, CacheableGetter>();
-            services.AddTransient<IObjectGenerator, TestObjectsGenerator>();
+            services.AddTransient<IObjectGenerator, RandomObjectGenerator>();
         }
     }
 }

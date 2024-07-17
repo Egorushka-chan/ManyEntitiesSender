@@ -10,6 +10,9 @@ namespace ManyEntitiesSender.BLL.Services.Abstractions
 {
     public interface ICacheableGetter
     {
-        IAsyncEnumerable<List<Package>> GetAllPackagesAsync();
+        IAsyncEnumerable<List<Body>> GetBodiesAsync();
+        IAsyncEnumerable<List<Hand>> GetHandsAsync();
+        IAsyncEnumerable<List<Leg>> GetLegsAsync();
+
     }
 }

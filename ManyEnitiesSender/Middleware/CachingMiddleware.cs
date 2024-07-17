@@ -21,21 +21,16 @@ namespace ManyEntitiesSender.Middleware
             Endpoint? endpoint = httpContext.GetEndpoint();
             if(endpoint is not null) {
                 if (endpoint.Metadata.Where(meta => meta is CacheableAttribute).Any()) {
-                    int tryies = 10;
-                    DateTime time = DateTime.Now;
-                    TimeSpan second = TimeSpan.FromSeconds(1);
+                    
 
-                    while (tryies != 0) {
-                        while (time + second > DateTime.Now) { }
 
-                        time = DateTime.Now;
-                        tryies--;
-                    }
                     httpContext.Response.StatusCode = 201;
-                    return;
                 }
             }
-            await _next(httpContext);
+            else
+            {
+                await _next(httpContext);
+            }
         }
     }
 

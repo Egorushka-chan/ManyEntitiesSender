@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ManyEntitiesSender.DAL.Interfaces;
+
 namespace ManyEntitiesSender.DAL.Entities
 {
-    public partial class Package
+    public partial class Leg : IEntity
     {
         [Key]
-        public int ID { get; set; }
-        public string? Key { get; set; }
-        public string? Data { get; set; }
+        public long ID  { get; set; }
+        public string State {get; set; }
     }
 }

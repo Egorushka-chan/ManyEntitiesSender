@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using ManyEntitiesSender.DAL.Entities;
-
 namespace ManyEntitiesSender.DAL.Interfaces
 {
-    public interface IObjectGenerator
+    public interface IEntity
     {
-        Task EnsurePartsCount();
+        public long ID { get; set; }
     }
 }

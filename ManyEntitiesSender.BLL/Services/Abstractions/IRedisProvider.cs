@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using ManyEntitiesSender.DAL.Entities;
+using StackExchange.Redis;
 
 namespace ManyEntitiesSender.DAL.Interfaces
 {
-    public interface IObjectGenerator
+    public interface IRedisProvider
     {
-        Task EnsurePartsCount();
+        IConnectionMultiplexer GetConnectionMultiplexer();
     }
 }

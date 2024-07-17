@@ -44,20 +44,14 @@ void AddDataAccessLayer(WebApplicationBuilder builder)
 
 void AddBusinessLayer(WebApplicationBuilder builder)
 {
-    string? redisConfiguration = builder.Configuration["Redis:Configuration"];
-    string? redisInstance = builder.Configuration["Redis:InstanceName"];
-    if (string.IsNullOrEmpty(redisConfiguration)) {
-        redisConfiguration = "localhost";
-    }
-    if (string.IsNullOrEmpty(redisInstance)) {
-        redisInstance = "local";
-    }
-
-    builder.Services.InjectBLL(redisConfiguration, redisInstance);
+    builder.Services.InjectBLL();
 }
 
 void AddOptions(WebApplicationBuilder builder)
 {
     builder.Services.Configure<PackageSettings>(
         builder.Configuration.GetSection("PackageSettings"));
+
+    builder.Services.Configure<RedisSettings>(
+        builder.Configuration.GetSection("RedisSettings"));
 }
