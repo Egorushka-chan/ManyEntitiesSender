@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ManyEntitiesSender.Attributes;
-using ManyEntitiesSender.DAL.Interfaces;
-using Microsoft.Extensions.Options;
-using ManyEntitiesSender.BLL.Settings;
+﻿using ManyEntitiesSender.Attributes;
+using ManyEntitiesSender.BLL.Models;
 using ManyEntitiesSender.BLL.Models.Requests;
+using ManyEntitiesSender.BLL.Services.Abstractions;
+using ManyEntitiesSender.DAL.Entities;
+using ManyEntitiesSender.DAL.Interfaces;
 using ManyEntitiesSender.Models.Responses;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ManyEntitiesSender.Controllers
 {
@@ -14,16 +16,70 @@ namespace ManyEntitiesSender.Controllers
     public class PackagesController : ControllerBase
     {
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
-        [ProducesResponseType(201)] // если прошло через middleware
+        [ProducesResponseType(200, Type = typeof(List<Body>))]
+        [ProducesResponseType(200, Type = typeof(List<Hand>))]
+        [ProducesResponseType(200, Type = typeof(List<Leg>))]
         [Cacheable]
         [HttpGet]
-        public IResult GetPackages([FromQuery] PackageRequest packageRequest)
+        public async Task<IResult> GetPackages([FromQuery] PackageRequest packageRequest, [FromServices] IPackageGetter getter)
         {
-            ErrorResponse errorResponse = new()
+            int packageLimit = -1;
+            int currentPackage = 1;
+
+            var options = new EntityFilterOptions()
             {
-                Body = "Middleware passed request to controller. This means that request wasn't handled properly"
+                PropertyFilter = packageRequest.Filter,
+                Skip = packageRequest.Skip,
+                Take = packageRequest.Take
             };
-            return TypedResults.BadRequest(errorResponse);
+
+            if(packageRequest.Table == "body")
+            {
+                List<Body> bodies = new List<Body>();
+                await foreach(var package in getter.GetPackageAsync<Body>(options))
+                {
+                    bodies.AddRange(package);
+                    if(currentPackage < packageLimit || packageLimit == -1)
+                    {
+                        currentPackage++;
+                    }
+                    else
+                        break;
+                }
+                return TypedResults.Ok(bodies);
+            }
+            else if(packageRequest.Table == "hand")
+            {
+                List<Hand> hands = new List<Hand>();
+                await foreach(var package in getter.GetPackageAsync<Hand>(options))
+                {
+                    hands.AddRange(hands);
+                    if(currentPackage < packageLimit || packageLimit == -1)
+                    {
+                        currentPackage++;
+                    }
+                    else
+                        break;
+                }
+                return TypedResults.Ok(hands);
+            }
+            else if (packageRequest.Table == "leg")
+            {
+                List<Leg> legs = new List<Leg>();
+                await foreach(var package in getter.GetPackageAsync<Leg>(options))
+                {
+                    legs.AddRange(legs);
+                    if(currentPackage < packageLimit || packageLimit == -1)
+                    {
+                        currentPackage++;
+                    }
+                    else
+                        break;
+                }
+                return TypedResults.Ok(legs);
+            }
+            else
+                return Results.BadRequest();
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]

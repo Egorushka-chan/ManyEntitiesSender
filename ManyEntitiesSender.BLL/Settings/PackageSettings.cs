@@ -9,6 +9,6 @@ namespace ManyEntitiesSender.BLL.Settings
     public class PackageSettings
     {
         public int PackageTotal { get; set; } = 100000;
-        public int PackageCount { get; set; } = 3000;
+        public int PackageCount { get; set; } = 5000;
     }
 }

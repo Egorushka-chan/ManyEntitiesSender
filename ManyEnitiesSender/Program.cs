@@ -27,6 +27,7 @@ if (app.Environment.IsDevelopment()) {
 
 app.UseAuthorization();
 
+app.UseMyCachingValidation();
 app.UseMyCaching();
 
 app.MapControllers();
@@ -53,5 +54,5 @@ void AddOptions(WebApplicationBuilder builder)
         builder.Configuration.GetSection("PackageSettings"));
 
     builder.Services.Configure<RedisSettings>(
-        builder.Configuration.GetSection("RedisSettings"));
+        builder.Configuration.GetSection("Redis"));
 }

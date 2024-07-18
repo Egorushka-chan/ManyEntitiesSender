@@ -1,16 +1,17 @@
 {
-  "mightiness": [
+  "Mightiness": [
     "Frail",
     "Weak",
     "Average",
     "Strong",
     "Powerful"
   ],
-  "state": [
+  "State": [
     "Damaged",
     "Sore",
     "Starving",
     "Normal",
     "Healty"
   ]
+  
 }

@@ -8,7 +8,7 @@ namespace ManyEntitiesSender.BLL.Models
 {
     internal class NamesObjectsGenerator
     {
-        public List<string> Mightiness;
-        public List<string> State;
-    }
+        public string[]? Mightiness { get; set; }
+        public string[]? State { get; set; }
+    } 
 }

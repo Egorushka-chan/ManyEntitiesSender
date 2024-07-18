@@ -41,7 +41,7 @@ namespace ManyEntitiesSender.BLL.Services.Abstractions
             int iterations = required/package;
 
             if (required > 0) {
-                foreach (int iteration in Enumerable.Range(1, iterations + 1)) {
+                foreach (int iteration in Enumerable.Range(1, iterations)) {
                     List<TEntity> entities = new();
 
                     foreach (int i in Enumerable.Range(0, package)) {

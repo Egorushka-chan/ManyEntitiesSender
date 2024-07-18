@@ -10,20 +10,4 @@
     <ProjectReference Include="..\ManyEnitiesSender.DAL\ManyEntitiesSender.DAL.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="internalFiles\namesObjectsGenerator.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="internalFiles\tryGetBodies.lua">
-      <Generator></Generator>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="internalFiles\tryGetHands.lua">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="internalFiles\tryGetLegs.lua">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

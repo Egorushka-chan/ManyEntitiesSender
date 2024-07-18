@@ -21,7 +21,7 @@ using System.Net.Http.Headers;
 namespace ManyEntitiesSender.BLL.Services.Implementations
 {
     /// <summary>
-    /// Класс заполняет базу основываясь на namesObjectsGenerator.json в папке InternalConfigs
+    /// Класс заполняет базу основываясь на namesObjectsGenerator.json в папке internalFiles
     /// </summary>
     public class RandomObjectGenerator: AbsObjectGenerator
     {
@@ -29,15 +29,15 @@ namespace ManyEntitiesSender.BLL.Services.Implementations
         Random _random = new Random(123);
         public RandomObjectGenerator(IPackageContext context, IOptions<PackageSettings> options, ILogger<AbsObjectGenerator> logger) : base(context, options, logger)
         {
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "InternalConfigs", "namesObjectsGenerator.json");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "internalFiles", "namesObjectsGenerator.json");
             if (!Path.Exists(path))
                 throw new FileNotFoundException("RandomObjectGenerator cannot be used without namesObjectsGenerator.json configuration file");
 
             NamesObjectsGenerator? result;
-            using(var file = File.OpenRead(path))
-            {
-                result = JsonSerializer.Deserialize<NamesObjectsGenerator>(file);
-            }
+
+            string json = File.ReadAllText(path);
+            result = JsonSerializer.Deserialize<NamesObjectsGenerator>(json);
+
 
             if (result == null)
                 throw new FileLoadException("namesObjectsGenerator.json is null");
@@ -46,7 +46,7 @@ namespace ManyEntitiesSender.BLL.Services.Implementations
 
         protected override Body CreateBody(int testNo)
         {
-            int selected = _random.Next(0, _properties.Mightiness.Count);
+            int selected = _random.Next(0, _properties.Mightiness.Count());
             return new Body()
             {
                 Mightiness = _properties.Mightiness[selected]
@@ -55,7 +55,7 @@ namespace ManyEntitiesSender.BLL.Services.Implementations
 
         protected override Hand CreateHand(int testNo)
         {
-            int selected = _random.Next(0, _properties.Mightiness.Count);
+            int selected = _random.Next(0, _properties.Mightiness.Count());
             return new Hand()
             {
                 State = _properties.State[selected]
@@ -64,7 +64,7 @@ namespace ManyEntitiesSender.BLL.Services.Implementations
 
         protected override Leg CreateLeg(int testNo)
         {
-            int selected = _random.Next(0, _properties.Mightiness.Count);
+            int selected = _random.Next(0, _properties.Mightiness.Count());
             return new Leg()
             {
                 State = _properties.State[selected]

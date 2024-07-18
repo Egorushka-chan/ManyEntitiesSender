@@ -24,9 +24,17 @@ namespace ManyEntitiesSender.DAL.Interfaces
         /// <param name="list">Элементы, которые будут отправлены в кэш</param>
         /// <returns><see cref="Task"/> для ожидания</returns>
         /// <exception cref="ArgumentException">Возникает при подаче неправильного типа</exception>
-        Task AppendList<TEntity>(List<TEntity> list) where TEntity : class, IEntity;
-        Task<List<Body>?> TryGetBodies(RedisFilterOptions filterOptions);
-        Task<List<Body>?> TryGetHands(RedisFilterOptions filterOptions);
-        Task<List<Body>?> TryGetLegs(RedisFilterOptions filterOptions);
+        Task AppendListAsync<TEntity>(List<TEntity> list) where TEntity : class, IEntity;
+        /// <summary>
+        /// Забирает кэшированные элементы из Redis
+        /// </summary>
+        /// <remarks>
+        /// Текущая реализация позволяет кэшировать элементы типов: <see cref="Body"/>, <see cref="Hand"/>, <see cref="Leg"/>
+        /// </remarks>
+        /// <typeparam name="TEntity"><see cref="Body"/>, <see cref="Hand"/>, <see cref="Leg"/></typeparam>
+        /// <param name="filterValue">Значение по которому фильтруем</param>
+        /// <returns>Если по такому значению в Redis нет ничего, то не вернёт ничего. Иначе будет возвращать пакеты размером, определённым в <see cref="PackageSettings"/> </returns>
+        /// <exception cref="ArgumentException"></exception>
+        IAsyncEnumerable<List<TEntity>> TryGetAsync<TEntity>(string? filterValue = null) where TEntity : class, IEntity, new();
     }
 }

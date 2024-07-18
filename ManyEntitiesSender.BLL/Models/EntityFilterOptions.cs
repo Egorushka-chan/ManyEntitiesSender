@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ManyEntitiesSender.BLL.Models
 {
-    public class RedisFilterOptions
+    public class EntityFilterOptions
     {
         public string? PropertyFilter { get; set; }
         public int? Skip { get; set; }

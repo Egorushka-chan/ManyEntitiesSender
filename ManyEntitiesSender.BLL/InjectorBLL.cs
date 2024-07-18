@@ -1,6 +1,7 @@
 ﻿using ManyEntitiesSender.BLL.Services.Abstractions;
 using ManyEntitiesSender.BLL.Services.Implementations;
 using ManyEntitiesSender.DAL;
+using ManyEntitiesSender.DAL.Implementations;
 using ManyEntitiesSender.DAL.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +12,9 @@ namespace ManyEntitiesSender.BLL
     {
         public static void InjectBLL(this IServiceCollection services)
         {
-            services.AddScoped<ICacheableGetter, CacheableGetter>();
+            services.AddScoped<IPackageGetter, PackageGetter>();
             services.AddTransient<IObjectGenerator, RandomObjectGenerator>();
+            services.AddScoped<IRedisProvider, RedisProvider>();
         }
     }
 }

@@ -9,26 +9,21 @@ using ManyEntitiesSender.DAL.Interfaces;
 using Microsoft.Extensions.Options;
 
 using StackExchange.Redis;
+using System.Net.Sockets;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ManyEntitiesSender.DAL.Implementations
 {
     public class RedisProvider : IRedisProvider
     {
-        public RedisProvider(IOptions<RedisSettings> settings)
+        public RedisProvider(IOptions<RedisSettings> settings, IOptions<PackageSettings> packageOptions)
         {
             this.settings = settings.Value;
-
-            if (luaScriptBodies is null) {
-                string path = Path.Combine(Directory.GetCurrentDirectory(), "internalFiles");
-                luaScriptBodies = new Dictionary<string, string> {
-                    { "body", File.ReadAllText(Path.Combine(path, "tryGetBodies.lua")) },
-                    { "hand", File.ReadAllText(Path.Combine(path, "tryGetHands.lua")) },
-                    { "leg", File.ReadAllText(Path.Combine(path, "tryGetLegs.lua")) }
-                };
-            };
+            this.packageSettings = packageOptions.Value;
         }
 
         protected RedisSettings settings { get; set; }
+        protected PackageSettings packageSettings { get; set; }
 
         private static IConnectionMultiplexer __connectionMultiplexer;
         private static Dictionary<string, string> luaScriptBodies;
@@ -57,7 +52,6 @@ namespace ManyEntitiesSender.DAL.Implementations
             byte[] mightinessHashBytes = MD5.HashData(mightinessBytes);
             return mightinessHashBytes;
         }
-
         private Task<long> IncreaseCounter(string table, string value)
         {
             return GetDatabase().StringIncrementAsync(new RedisKey($"counter:{table}:{value}"), 1);
@@ -73,8 +67,20 @@ namespace ManyEntitiesSender.DAL.Implementations
             return result;
         }
 
+        private async Task<List<string>> GetUniqueValues<TEntity>() where TEntity: class, IEntity
+        {
+            RedisValue[] values = await GetDatabase().SetMembersAsync(new RedisKey($"{typeof(TEntity).Name}:valuesset"));
+            return (from value in values
+                   select value.ToString()).ToList();
+        }
+
+        private Task<bool> SetUniqueValue(string table, string value)
+        {
+            return GetDatabase().SetAddAsync($"{table}:valuesset", new RedisValue($"{value}"));
+        }
+
         /// <inheritdoc/>
-        public Task AppendList<TEntity>(List<TEntity> list) where TEntity: class, IEntity
+        public async Task AppendListAsync<TEntity>(List<TEntity> list) where TEntity: class, IEntity
         {
             // Проверка что тут реализован тип, который будет использоваться
             Type type = typeof(TEntity);
@@ -84,98 +90,228 @@ namespace ManyEntitiesSender.DAL.Implementations
 
             // Зачем тут этот делегат? Чтобы не просчитывать выбор типа каждый раз в блоке foreach далее
             Func<List<HashEntry>, IEntity, string> appendFields;
-            if (type == typeof(Body)) {
-                appendFields = (List<HashEntry> fields, IEntity entity) => {
-                    HashEntry mightiness = new HashEntry(new RedisValue("mightiness"), new RedisValue(((Body)entity).Mightiness));
+            appendFields = SelectFieldAppendingAlgorithm(type);
 
-                    RedisValue hashValue = RedisValue.Unbox(GetMD5(((Body)entity).Mightiness));
-                    HashEntry mightinessHash = new HashEntry(new RedisValue("mightinessIndex"), hashValue);
-
-                    fields.Add(mightiness);
-                    fields.Add(mightinessHash);
-
-                    return ((Body)entity).Mightiness;
-                };
-            }
-            else if(type == typeof(Hand)) {
-                appendFields = (List<HashEntry> fields, IEntity entity) => {
-                    HashEntry state = new HashEntry(new RedisValue("state"), new RedisValue(((Hand)entity).State));
-
-                    RedisValue hashValue = RedisValue.Unbox(GetMD5(((Hand)entity).State));
-                    HashEntry stateHash = new HashEntry(new RedisValue("stateIndex"), hashValue);
-
-                    fields.Add(state);
-                    fields.Add(stateHash);
-
-                    return ((Hand)entity).State;
-                };
-            }
-            else if (type == typeof(Leg)) {
-                appendFields = (List<HashEntry> fields, IEntity entity) => {
-                    HashEntry state = new HashEntry(new RedisValue("state"), new RedisValue(((Leg)entity).State));
-
-                    RedisValue hashValue = RedisValue.Unbox(GetMD5(((Leg)entity).State));
-                    HashEntry stateHash = new HashEntry(new RedisValue("stateIndex"), hashValue);
-
-                    fields.Add(state);
-                    fields.Add(stateHash);
-
-                    return ((Leg)entity).State;
-                };
-            }
-            else {
-                throw new ArgumentException($"Type {type.Name} can't be inserted inside Redis (Not Implemented)");
-            }
-            
+            // Получаем количество элементов для того, чтобы в возвращаемой задаче реализовать ожидание
             int entityCount = list.Count;
-            foreach (TEntity element in list) {
+            foreach (TEntity element in list)
+            {
                 List<HashEntry> fields = new();
+                HashEntry idEntry = new HashEntry(new RedisValue("id"), new RedisValue(element.ID.ToString()));
+
                 string value = appendFields.Invoke(fields, element);
 
+                long counter = await GetCounter($"{nameof(Body)}", $"{value}");
+
+#pragma warning disable CS4014 // Так как этот вызов не ожидается, выполнение существующего метода продолжается до тех пор, пока вызов не будет завершен
+
+                // Добавляем в список уникальных значений
+                SetUniqueValue(type.Name, value);
+                RedisKey key = new RedisKey($"{type.Name}:{value}:{counter + 1}");
+                HashEntry[] hashEntries = fields.ToArray();
+
                 // Все запросы делаются в пайплайне, и не ожидаются. Ожидаться они будут задачей далее.
-                GetDatabase().HashSetAsync(new RedisKey($"{nameof(Body)}:{value}:{element.ID}"), fields.ToArray())
-                    .ContinueWith((antecedent) => {
-                        IncreaseCounter($"{nameof(Body)}", $"{value}");
+                Task setter = GetDatabase().HashSetAsync(key, hashEntries);
+                setter.ContinueWith((antecedent) =>
+                    {
                         entityCount--;
                     });
+#pragma warning restore CS4014 // Так как этот вызов не ожидается, выполнение существующего метода продолжается до тех пор, пока вызов не будет завершен
 
+                await IncreaseCounter($"{type.Name}", $"{value}");
             }
 
             // Эта задача нужна для возврата того, что можно ожидать
-            Task awaitedTask = Task.Run(() => {
+            Task awaitedTask = Task.Run(() =>
+            {
                 bool succeeded = false;
-                while (!succeeded) {
-                    if (entityCount >= 0) {
+                while (!succeeded)
+                {
+                    if (entityCount >= 0)
+                    {
                         succeeded = true;
                     }
                 }
             });
-
-            return awaitedTask;
+            await awaitedTask;
+            return;
         }
 
-        public async Task<List<Body>?> TryGetBodies(RedisFilterOptions filterOptions)
+        /// <inheritdoc/>
+        public async IAsyncEnumerable<List<TEntity>> TryGetAsync<TEntity>(string? filterValue = null) where TEntity : class, IEntity, new()
         {
-            
-            if (filterOptions.PropertyFilter != null) {
-                var script = LuaScript.Prepare(luaScriptBodies["body"]);
-                var result = GetDatabase().ScriptEvaluate(script, new {});
+            Type type = typeof(TEntity);
+            Type[] allowedTypes = { typeof(Body), typeof(Hand), typeof(Leg) };
+            if (!allowedTypes.Contains(type))
+                throw new ArgumentException($"Type {type.Name} can't be gotten from Redis (Not Implemented)");
+
+            if (filterValue != null)
+            {
+                // Входим сюда, если запрошено конкретное value
+                long count = await GetCounter("body", filterValue);
+                if (count <= 0)
+                    yield break;
+
+                int packageCount = packageSettings.PackageCount;
+                int initialIteration = 0;
+                int initialElement = 1;
+                long requiredIteration = count / packageCount;
+                if (count % packageCount != 0)
+                    requiredIteration++;
+
+                Func<HashEntry[], IEntity> assertValues;
+                assertValues = SelectFieldAssertionAlgorithm(type);
+
+                for (int iteration = initialIteration; iteration < requiredIteration; iteration++)
+                {
+                    List<TEntity> packageList = new List<TEntity>();
+
+                    for (int i = initialElement; i <= packageCount; i++)
+                    {
+                        int element = i + (iteration * packageCount);
+
+                        HashEntry[] values = await GetDatabase().HashGetAllAsync(new RedisKey($"{type.Name}:{filterValue}:{element}"));
+
+                        TEntity entity = assertValues(values) as TEntity;
+                        packageList.Add(entity);
+                    }
+
+                    yield return packageList;
+                }
             }
             else {
+                // Входим сюда, если запрошены все значения
+                // Код повторяется, 
+                // потому что как провести IAsyncEnumerable через несколько методов адекватно я понятия не имею
+                List<string> uniqueValues = await GetUniqueValues<TEntity>();
+                foreach(string uniqueValue in uniqueValues)
+                {
+                    long count = await GetCounter("body", uniqueValue);
+                    int packageCount = packageSettings.PackageCount;
+                    long requiredIterations = count/packageCount;
+                    if (count % packageCount != 0)
+                        requiredIterations++;
+
+                    Func<HashEntry[], IEntity> assertValues;
+                    assertValues = SelectFieldAssertionAlgorithm(type);
                 
+                    for(int iteration = 0; iteration < requiredIterations; iteration++)
+                    {
+                        List<TEntity> packageList = new List<TEntity>();
+
+                        for(int i = 1; i <= packageCount; i++)
+                        {
+                            int element = i + (iteration * packageCount);
+
+                            HashEntry[] values = await GetDatabase().HashGetAllAsync(new RedisKey($"body:{uniqueValue}:{element}"));
+
+                            TEntity entity = assertValues(values) as TEntity;
+                            packageList.Add(entity);
+                        }
+
+                        yield return packageList;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Для того чтобы не делать каждый раз проверки и выбор алгоритма для каждого типа в <see cref="AppendListAsync{TEntity}(List{TEntity})"/>,
+        /// он делается один раз заранее здесь
+        /// </summary>
+        /// <exception cref="ArgumentException"></exception>
+        private Func<List<HashEntry>, IEntity, string> SelectFieldAppendingAlgorithm(Type type)
+        {
+            Func<List<HashEntry>, IEntity, string> appendFields;
+            if (type == typeof(Body))
+            {
+                appendFields = (List<HashEntry> fields, IEntity entity) =>
+                {
+                    HashEntry mightiness = new HashEntry(new RedisValue("mightiness"), new RedisValue(((Body)entity).Mightiness));
+
+                    fields.Add(mightiness);
+
+                    return ((Body)entity).Mightiness;
+                };
+            }
+            else if (type == typeof(Hand))
+            {
+                appendFields = (List<HashEntry> fields, IEntity entity) =>
+                {
+                    HashEntry state = new HashEntry(new RedisValue("state"), new RedisValue(((Hand)entity).State));
+
+                    fields.Add(state);
+
+                    return ((Hand)entity).State;
+                };
+            }
+            else if (type == typeof(Leg))
+            {
+                appendFields = (List<HashEntry> fields, IEntity entity) =>
+                {
+                    HashEntry state = new HashEntry(new RedisValue("state"), new RedisValue(((Leg)entity).State));
+
+                    fields.Add(state);
+
+                    return ((Leg)entity).State;
+                };
+            }
+            else
+            {
+                throw new ArgumentException($"Type {type.Name} can't be inserted inside Redis (Not Implemented)");
             }
 
-            throw new NotImplementedException();
+            return appendFields;
         }
 
-        public async Task<List<Body>?> TryGetHands(RedisFilterOptions filterOptions)
+        /// <summary>
+        /// Для того чтобы не делать каждый раз проверки и выбор алгоритма для каждого типа в <see cref="TryGetAsync{TEntity}(EntityFilterOptions)"/>,
+        /// он делается один раз заранее здесь
+        /// </summary>
+        /// <exception cref="ArgumentException"></exception>
+        private static Func<HashEntry[], IEntity> SelectFieldAssertionAlgorithm(Type type)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<Body>?> TryGetLegs(RedisFilterOptions filterOptions)
-        {
-            throw new NotImplementedException();
+            return (HashEntry[] values) =>
+            {
+                if (type == typeof(Body))
+                {
+                    Body body = new Body();
+                    foreach (HashEntry entry in values)
+                    {
+                        if (entry.Name == "id")
+                            body.ID = int.Parse(entry.Value);
+                        else if (entry.Name == "mightiness")
+                            body.Mightiness = entry.Value;
+                    }
+                    return body;
+                }
+                else if (type == typeof(Hand))
+                {
+                    Hand hand = new Hand();
+                    foreach (HashEntry entry in values)
+                    {
+                        if (entry.Name == "id")
+                            hand.ID = int.Parse(entry.Value);
+                        else if (entry.Name == "state")
+                            hand.State = entry.Value;
+                    }
+                    return hand;
+                }
+                else if (type == typeof(Leg))
+                {
+                    Leg leg = new Leg();
+                    foreach (HashEntry entry in values)
+                    {
+                        if (entry.Name == "id")
+                            leg.ID = int.Parse(entry.Value);
+                        else if (entry.Name == "state")
+                            leg.State = entry.Value;
+                    }
+                    return leg;
+                }
+                else
+                    throw new ArgumentException($"Type {type.Name} can't be gotten from Redis (Not Implemented)");
+            };
         }
     }
 }

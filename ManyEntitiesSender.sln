@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManyEntitiesSender.DAL", "M
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{A732FA1D-4C18-427F-BDEA-D60C55F52379}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyEntitiesSender.BLL", "ManyEntitiesSender.BLL\ManyEntitiesSender.BLL.csproj", "{34A19CAA-43E0-4A7D-B2B8-882878424F99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManyEntitiesSender.BLL", "ManyEntitiesSender.BLL\ManyEntitiesSender.BLL.csproj", "{34A19CAA-43E0-4A7D-B2B8-882878424F99}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{A862E551-FE66-4197-BAEA-3C4E3D537E9A}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
