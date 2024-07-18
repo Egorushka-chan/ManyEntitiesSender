@@ -23,7 +23,7 @@ namespace ManyEntitiesSender.Controllers
         [HttpGet]
         public async Task<IResult> GetPackages([FromQuery] PackageRequest packageRequest, [FromServices] IPackageGetter getter)
         {
-            int packageLimit = -1;
+            int packageLimit = 1;
             int currentPackage = 1;
 
             var options = new EntityFilterOptions()

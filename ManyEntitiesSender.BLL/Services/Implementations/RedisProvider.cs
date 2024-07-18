@@ -80,7 +80,7 @@ namespace ManyEntitiesSender.DAL.Implementations
         }
 
         /// <inheritdoc/>
-        public async Task AppendListAsync<TEntity>(List<TEntity> list) where TEntity: class, IEntity
+        public async Task AppendListAsync<TEntity>(TEntity[] array) where TEntity: class, IEntity
         {
             // Проверка что тут реализован тип, который будет использоваться
             Type type = typeof(TEntity);
@@ -93,8 +93,9 @@ namespace ManyEntitiesSender.DAL.Implementations
             appendFields = SelectFieldAppendingAlgorithm(type);
 
             // Получаем количество элементов для того, чтобы в возвращаемой задаче реализовать ожидание
-            int entityCount = list.Count;
-            foreach (TEntity element in list)
+            int entityCount = array.Count();
+            long res = 0;
+            foreach (TEntity element in array)
             {
                 List<HashEntry> fields = new();
                 HashEntry idEntry = new HashEntry(new RedisValue("id"), new RedisValue(element.ID.ToString()));
@@ -118,7 +119,7 @@ namespace ManyEntitiesSender.DAL.Implementations
                     });
 #pragma warning restore CS4014 // Так как этот вызов не ожидается, выполнение существующего метода продолжается до тех пор, пока вызов не будет завершен
 
-                await IncreaseCounter($"{type.Name}", $"{value}");
+                res = await IncreaseCounter($"{type.Name}", $"{value}");
             }
 
             // Эта задача нужна для возврата того, что можно ожидать
@@ -148,7 +149,7 @@ namespace ManyEntitiesSender.DAL.Implementations
             if (filterValue != null)
             {
                 // Входим сюда, если запрошено конкретное value
-                long count = await GetCounter("body", filterValue);
+                long count = await GetCounter(type.Name, filterValue);
                 if (count <= 0)
                     yield break;
 
@@ -186,7 +187,7 @@ namespace ManyEntitiesSender.DAL.Implementations
                 List<string> uniqueValues = await GetUniqueValues<TEntity>();
                 foreach(string uniqueValue in uniqueValues)
                 {
-                    long count = await GetCounter("body", uniqueValue);
+                    long count = await GetCounter(type.Name, uniqueValue);
                     int packageCount = packageSettings.PackageCount;
                     long requiredIterations = count/packageCount;
                     if (count % packageCount != 0)

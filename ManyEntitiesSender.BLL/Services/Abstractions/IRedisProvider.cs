@@ -21,10 +21,10 @@ namespace ManyEntitiesSender.DAL.Interfaces
         /// Текущая реализация позволяет кэшировать элементы типов: <see cref="Body"/>, <see cref="Hand"/>, <see cref="Leg"/>
         /// </remarks>
         /// <typeparam name="TEntity">Должен соответствовать одному из типов: <see cref="Body"/>, <see cref="Hand"/>, <see cref="Leg"/></typeparam>
-        /// <param name="list">Элементы, которые будут отправлены в кэш</param>
+        /// <param name="array">Элементы, которые будут отправлены в кэш</param>
         /// <returns><see cref="Task"/> для ожидания</returns>
         /// <exception cref="ArgumentException">Возникает при подаче неправильного типа</exception>
-        Task AppendListAsync<TEntity>(List<TEntity> list) where TEntity : class, IEntity;
+        Task AppendListAsync<TEntity>(TEntity[] array) where TEntity : class, IEntity;
         /// <summary>
         /// Забирает кэшированные элементы из Redis
         /// </summary>

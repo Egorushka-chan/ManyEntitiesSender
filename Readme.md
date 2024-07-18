@@ -25,4 +25,4 @@
 	2. Для создания данных в базе данных:
 		1. `POST api/Packages/ensure`
 		2. Отправить ensure в Swagger
-	3. Как пример теста, отправить table = body, filter = Strong
+	3. Как пример теста, отправить table = body, filter = Strong. Если возвращает 200 - это контроллер из базы, 201 - middleware из Redis

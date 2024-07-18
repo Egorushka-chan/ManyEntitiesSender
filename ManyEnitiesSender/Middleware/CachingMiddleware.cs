@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 
 using ManyEntitiesSender.Attributes;
@@ -24,11 +26,15 @@ namespace ManyEntitiesSender.Middleware
             _next = next;
         }
 
-        private static ConcurrentDictionary<string, Mutex> monitors = new() 
-        {
+        // Мьютексы, мониторы, lock - они все требуют работы в синхронном контексте - т.е между wait и release не должно быть await
+        //private static ConcurrentDictionary<string, Mutex> monitors = new();
 
-        };
+        // А SemaphoreSlim вообще нормально
+        private static ConcurrentDictionary<string, SemaphoreSlim> semaphores = new();
 
+        /// <summary>
+        /// Если возвращает 200 - это контроллер создал, если 201 - то создал Redis
+        /// </summary>
         public async Task InvokeAsync(HttpContext httpContext, IRedisProvider redis)
         {
             Endpoint? endpoint = httpContext.GetEndpoint();
@@ -43,12 +49,12 @@ namespace ManyEntitiesSender.Middleware
                     bool redisReturnedValue = await CheckRedis(httpContext, redis, table, filter);
                     if (redisReturnedValue)
                     {
-                        httpContext.Response.StatusCode = 201;
                         return;
                     }
                     try
                     {
-                        monitors.GetOrAdd(table, new Mutex()).WaitOne(); // здесь происходит магия 2check
+                        //monitors.GetOrAdd(table, new Mutex()).WaitOne(); // здесь происходит магия 2check
+                        semaphores.GetOrAdd(table, new SemaphoreSlim(1,1)).Wait();
                         bool redisReturnedValueSecond = await CheckRedis(httpContext, redis, table, filter); 
                         if (redisReturnedValueSecond)
                         {
@@ -77,7 +83,8 @@ namespace ManyEntitiesSender.Middleware
                     }
                     finally
                     {
-                        monitors.GetOrAdd(table, new Mutex()).ReleaseMutex();
+                        //monitors.GetOrAdd(table, new Mutex()).ReleaseMutex();
+                        semaphores.GetOrAdd(table, new SemaphoreSlim(0,1)).Release();
                     }
                 }
                 else {
@@ -91,18 +98,18 @@ namespace ManyEntitiesSender.Middleware
         {
             if (table == "body")
             {
-                List<Body> bodies = JsonSerializer.Deserialize<List<Body>>(responseBody) ?? throw new ArgumentNullException(nameof(responseBody));
+                Body[] bodies = JsonSerializer.Deserialize<Body[]?>(responseBody) ?? throw new ArgumentNullException(nameof(responseBody));
                 await redis.AppendListAsync(bodies);
             }
             else if (table == "hand")
             {
-                List<Body> bodies = JsonSerializer.Deserialize<List<Body>>(responseBody) ?? throw new ArgumentNullException(nameof(responseBody));
-                await redis.AppendListAsync(bodies);
+                Hand[] hands = JsonSerializer.Deserialize<Hand[]?>(responseBody) ?? throw new ArgumentNullException(nameof(responseBody));
+                await redis.AppendListAsync(hands);
             }
             else if (table == "leg")
             {
-                List<Body> bodies = JsonSerializer.Deserialize<List<Body>>(responseBody) ?? throw new ArgumentNullException(nameof(responseBody));
-                await redis.AppendListAsync(bodies);
+                Leg[] legs = JsonSerializer.Deserialize<Leg[]?>(responseBody) ?? throw new ArgumentNullException(nameof(responseBody));
+                await redis.AppendListAsync(legs);
             }
         }
 
@@ -128,6 +135,7 @@ namespace ManyEntitiesSender.Middleware
                     redisReturnedValue = true;
                 }
                 if (values.Count > 0)
+                    httpContext.Response.StatusCode = 201;
                     await httpContext.Response.WriteAsJsonAsync(values);
             }
             if (requestedTable.ToLower() == "hand")
@@ -145,6 +153,7 @@ namespace ManyEntitiesSender.Middleware
                     redisReturnedValue = true;
                 }
                 if (values.Count > 0)
+                    httpContext.Response.StatusCode = 201;
                     await httpContext.Response.WriteAsJsonAsync(values);
             }
             if (requestedTable.ToLower() == "leg")
@@ -162,6 +171,7 @@ namespace ManyEntitiesSender.Middleware
                     redisReturnedValue = true;
                 }
                 if (values.Count > 0)
+                    httpContext.Response.StatusCode = 201;
                     await httpContext.Response.WriteAsJsonAsync(values);
             }
 
