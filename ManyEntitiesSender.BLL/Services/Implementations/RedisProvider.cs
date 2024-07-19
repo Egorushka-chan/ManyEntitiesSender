@@ -99,6 +99,7 @@ namespace ManyEntitiesSender.DAL.Implementations
             {
                 List<HashEntry> fields = new();
                 HashEntry idEntry = new HashEntry(new RedisValue("id"), new RedisValue(element.ID.ToString()));
+                fields.Add(idEntry);
 
                 string value = appendFields.Invoke(fields, element);
 
@@ -170,6 +171,8 @@ namespace ManyEntitiesSender.DAL.Implementations
                     for (int i = initialElement; i <= packageCount; i++)
                     {
                         int element = i + (iteration * packageCount);
+                        if (element > count)
+                            break;
 
                         HashEntry[] values = await GetDatabase().HashGetAllAsync(new RedisKey($"{type.Name}:{filterValue}:{element}"));
 
@@ -203,8 +206,10 @@ namespace ManyEntitiesSender.DAL.Implementations
                         for(int i = 1; i <= packageCount; i++)
                         {
                             int element = i + (iteration * packageCount);
+                            if (element > count)
+                                break;
 
-                            HashEntry[] values = await GetDatabase().HashGetAllAsync(new RedisKey($"body:{uniqueValue}:{element}"));
+                            HashEntry[] values = await GetDatabase().HashGetAllAsync(new RedisKey($"{type.Name}:{uniqueValue}:{element}"));
 
                             TEntity entity = assertValues(values) as TEntity;
                             packageList.Add(entity);

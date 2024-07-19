@@ -58,7 +58,7 @@ namespace ManyEntitiesSender.Middleware
                         bool redisReturnedValueSecond = await CheckRedis(httpContext, redis, table, filter); 
                         if (redisReturnedValueSecond)
                         {
-                            httpContext.Response.StatusCode = 201;
+                            // httpContext.Response.StatusCode = 201;
                         }
                         else
                         {
@@ -134,9 +134,10 @@ namespace ManyEntitiesSender.Middleware
 
                     redisReturnedValue = true;
                 }
-                if (values.Count > 0)
+                if (values.Count > 0) {
                     httpContext.Response.StatusCode = 201;
                     await httpContext.Response.WriteAsJsonAsync(values);
+                }
             }
             if (requestedTable.ToLower() == "hand")
             {
@@ -152,9 +153,11 @@ namespace ManyEntitiesSender.Middleware
 
                     redisReturnedValue = true;
                 }
-                if (values.Count > 0)
+                if (values.Count > 0) {
                     httpContext.Response.StatusCode = 201;
                     await httpContext.Response.WriteAsJsonAsync(values);
+                }
+                    
             }
             if (requestedTable.ToLower() == "leg")
             {
@@ -170,9 +173,10 @@ namespace ManyEntitiesSender.Middleware
 
                     redisReturnedValue = true;
                 }
-                if (values.Count > 0)
+                if (values.Count > 0) {
                     httpContext.Response.StatusCode = 201;
                     await httpContext.Response.WriteAsJsonAsync(values);
+                }
             }
 
             return redisReturnedValue;

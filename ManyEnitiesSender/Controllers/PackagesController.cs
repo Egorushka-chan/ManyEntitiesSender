@@ -23,7 +23,7 @@ namespace ManyEntitiesSender.Controllers
         [HttpGet]
         public async Task<IResult> GetPackages([FromQuery] PackageRequest packageRequest, [FromServices] IPackageGetter getter)
         {
-            int packageLimit = 1;
+            int packageLimit = 2;
             int currentPackage = 1;
 
             var options = new EntityFilterOptions()
@@ -53,7 +53,7 @@ namespace ManyEntitiesSender.Controllers
                 List<Hand> hands = new List<Hand>();
                 await foreach(var package in getter.GetPackageAsync<Hand>(options))
                 {
-                    hands.AddRange(hands);
+                    hands.AddRange(package);
                     if(currentPackage < packageLimit || packageLimit == -1)
                     {
                         currentPackage++;
@@ -68,7 +68,7 @@ namespace ManyEntitiesSender.Controllers
                 List<Leg> legs = new List<Leg>();
                 await foreach(var package in getter.GetPackageAsync<Leg>(options))
                 {
-                    legs.AddRange(legs);
+                    legs.AddRange(package);
                     if(currentPackage < packageLimit || packageLimit == -1)
                     {
                         currentPackage++;
