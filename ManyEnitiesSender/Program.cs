@@ -1,7 +1,6 @@
 using ManyEntitiesSender.BLL;
 using ManyEntitiesSender.BLL.Settings;
 using ManyEntitiesSender.DAL;
-using ManyEntitiesSender.DAL.Interfaces;
 using ManyEntitiesSender.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);

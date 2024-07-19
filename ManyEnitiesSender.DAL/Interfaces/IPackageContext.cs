@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ManyEntitiesSender.DAL.Entities;
+﻿using ManyEntitiesSender.DAL.Entities;
 using ManyEntitiesSender.DAL.Implementations;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace ManyEntitiesSender.DAL.Interfaces

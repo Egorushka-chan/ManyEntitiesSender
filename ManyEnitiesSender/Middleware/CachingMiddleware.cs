@@ -1,20 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 
 using ManyEntitiesSender.Attributes;
-using ManyEntitiesSender.BLL.Services.Abstractions;
 using ManyEntitiesSender.DAL.Entities;
 using ManyEntitiesSender.DAL.Interfaces;
 using ManyEntitiesSender.Models;
-using ManyEntitiesSender.Models.Responses;
-
-using Microsoft.AspNetCore.Http.Connections;
-
-using StackExchange.Redis;
 
 namespace ManyEntitiesSender.Middleware
 {

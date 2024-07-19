@@ -1,6 +1,5 @@
 ﻿using ManyEntitiesSender.BLL.Services.Abstractions;
 using ManyEntitiesSender.BLL.Services.Implementations;
-using ManyEntitiesSender.DAL;
 using ManyEntitiesSender.DAL.Implementations;
 using ManyEntitiesSender.DAL.Interfaces;
 

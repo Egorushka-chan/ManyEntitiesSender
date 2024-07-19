@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ManyEntitiesSender.RAL\ManyEntitiesSender.RAL.csproj" />
     <ProjectReference Include="..\ManyEnitiesSender.DAL\ManyEntitiesSender.DAL.csproj" />
   </ItemGroup>
 

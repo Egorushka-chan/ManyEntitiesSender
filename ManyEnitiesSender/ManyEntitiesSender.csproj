@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ManyEntitiesSender.RAL\ManyEntitiesSender.RAL.csproj" />
     <ProjectReference Include="..\ManyEnitiesSender.DAL\ManyEntitiesSender.DAL.csproj" />
     <ProjectReference Include="..\ManyEntitiesSender.BLL\ManyEntitiesSender.BLL.csproj" />
   </ItemGroup>

@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
+using ManyEntitiesSender.BLL.Models;
+using ManyEntitiesSender.BLL.Services.Abstractions;
 using ManyEntitiesSender.BLL.Settings;
+using ManyEntitiesSender.DAL.Entities;
 using ManyEntitiesSender.DAL.Interfaces;
-using ManyEntitiesSender.DAL;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ManyEntitiesSender.BLL.Services.Abstractions;
-using ManyEntitiesSender.DAL.Entities;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using System.Net.Http.Json;
-using System.Text.Json;
-using ManyEntitiesSender.BLL.Models;
-using System.Net.Http.Headers;
 
 namespace ManyEntitiesSender.BLL.Services.Implementations
 {

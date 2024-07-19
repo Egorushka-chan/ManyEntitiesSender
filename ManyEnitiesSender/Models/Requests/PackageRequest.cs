@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ManyEntitiesSender.BLL.Models.Requests
+﻿namespace ManyEntitiesSender.BLL.Models.Requests
 {
     public class PackageRequest
     {

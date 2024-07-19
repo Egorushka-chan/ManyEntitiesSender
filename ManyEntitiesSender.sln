@@ -12,9 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManyEntitiesSender.BLL", "ManyEntitiesSender.BLL\ManyEntitiesSender.BLL.csproj", "{34A19CAA-43E0-4A7D-B2B8-882878424F99}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{A862E551-FE66-4197-BAEA-3C4E3D537E9A}"
-	ProjectSection(SolutionItems) = preProject
-		Readme.md = Readme.md
-	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyEntitiesSender.RAL", "..\ManyEntitiesSender.RAL\ManyEntitiesSender.RAL.csproj", "{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +37,10 @@ Global
 		{34A19CAA-43E0-4A7D-B2B8-882878424F99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34A19CAA-43E0-4A7D-B2B8-882878424F99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34A19CAA-43E0-4A7D-B2B8-882878424F99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

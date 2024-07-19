@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ManyEntitiesSender.BLL.Settings;
+﻿using ManyEntitiesSender.BLL.Settings;
+using ManyEntitiesSender.DAL.Entities;
 using ManyEntitiesSender.DAL.Interfaces;
-using ManyEntitiesSender.DAL;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ManyEntitiesSender.DAL.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace ManyEntitiesSender.BLL.Services.Abstractions
 {

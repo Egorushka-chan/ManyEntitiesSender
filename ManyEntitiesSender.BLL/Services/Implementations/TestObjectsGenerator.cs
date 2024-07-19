@@ -1,11 +1,8 @@
-﻿using System.Runtime.InteropServices;
-
-using ManyEntitiesSender.BLL.Services.Abstractions;
+﻿using ManyEntitiesSender.BLL.Services.Abstractions;
 using ManyEntitiesSender.BLL.Settings;
 using ManyEntitiesSender.DAL.Entities;
 using ManyEntitiesSender.DAL.Interfaces;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

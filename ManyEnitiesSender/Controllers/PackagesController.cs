@@ -7,7 +7,6 @@ using ManyEntitiesSender.DAL.Interfaces;
 using ManyEntitiesSender.Models.Responses;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ManyEntitiesSender.Controllers
 {
