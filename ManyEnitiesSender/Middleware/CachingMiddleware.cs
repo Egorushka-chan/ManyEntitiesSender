@@ -74,7 +74,8 @@ namespace ManyEntitiesSender.Middleware
                     finally
                     {
                         //monitors.GetOrAdd(table, new Mutex()).ReleaseMutex();
-                        semaphores.GetOrAdd(table, new SemaphoreSlim(0,1)).Release();
+                        semaphores.TryGetValue(table, out SemaphoreSlim? semaphore);
+                        semaphore?.Release();
                     }
                 }
                 else {
