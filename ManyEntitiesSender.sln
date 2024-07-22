@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManyEntitiesSender.BLL", "M
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{A862E551-FE66-4197-BAEA-3C4E3D537E9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyEntitiesSender.RAL", "..\ManyEntitiesSender.RAL\ManyEntitiesSender.RAL.csproj", "{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyEntitiesSender.RAL", "ManyEntitiesSender.RAL\ManyEntitiesSender.RAL.csproj", "{FDE41BB1-3F74-4827-A5AA-FF1B8EAFB0B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyEntitiesSender.PL", "..\ManyEntitiesSender.PL\ManyEntitiesSender.PL.csproj", "{3EB4329A-DD9D-4E62-B72D-BAEFFCF72628}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyEntitiesSender.PL", "ManyEntitiesSender.PL\ManyEntitiesSender.PL.csproj", "{3EB4329A-DD9D-4E62-B72D-BAEFFCF72628}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
