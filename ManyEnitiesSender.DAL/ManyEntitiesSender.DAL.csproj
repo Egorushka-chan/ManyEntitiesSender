@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ManyEntitiesSender.PL\ManyEntitiesSender.PL.csproj" />
+    <ProjectReference Include="..\ManyEntitiesSender.PL\ManyEntitiesSender.PL.csproj" />
   </ItemGroup>
 
 </Project>
